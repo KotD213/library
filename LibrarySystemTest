@@ -1,0 +1,125 @@
+import java.util.HashMap;
+import java.util.Map;
+
+class Book {
+    private int bookId;
+    private String title;
+
+    public Book(int bookId, String title) {
+        this.bookId = bookId;
+        this.title = title;
+    }
+
+    public int getBookId() {
+        return bookId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+}
+
+class User {
+    private int userId;
+    private String name;
+
+    public User(int userId, String name) {
+        this.userId = userId;
+        this.name = name;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+class Library {
+    private Map<Integer, Book> books;
+    private Map<Integer, User> users;
+    private Map<Integer, Integer> penalties;
+
+    public Library() {
+        this.books = new HashMap<>();
+        this.users = new HashMap<>();
+        this.penalties = new HashMap<>();
+    }
+
+    public void addBook(int bookId, String title) {
+        books.put(bookId, new Book(bookId, title));
+    }
+
+    public void removeBook(int bookId) {
+        books.remove(bookId);
+    }
+
+    public void addUser(int userId, String name) {
+        users.put(userId, new User(userId, name));
+        penalties.put(userId, 0);
+    }
+
+    public void removeUser(int userId) {
+        users.remove(userId);
+        penalties.remove(userId);
+    }
+
+    public String rentBook(int userId, int bookId, int days) {
+        if (!users.containsKey(userId) || !books.containsKey(bookId)) {
+            return "Invalid user or book ID";
+        }
+
+        return "Book rented successfully";
+    }
+
+    public String returnBook(int userId, int bookId, int daysLate) {
+        if (!users.containsKey(userId) || !books.containsKey(bookId)) {
+            return "Invalid user or book ID";
+        }
+
+        int penalty = calculatePenalty(daysLate);
+        penalties.put(userId, penalties.get(userId) + penalty);
+
+        if (penalties.get(userId) >= 10) {
+            penalties.put(userId, 0);
+            return "Book return not allowed for a month due to excessive penalties";
+        }
+
+        return "Book returned. Penalty points: " + penalties.get(userId);
+    }
+
+    private int calculatePenalty(int daysLate) {
+        return Math.max(0, daysLate);
+    }
+
+    public void resetPenaltiesAfterMonth() {
+        for (int userId : penalties.keySet()) {
+            penalties.put(userId, 0);
+        }
+    }
+}
+
+public class LibrarySystemTest {
+    public static void main(String[] args) {
+        Library library = new Library();
+
+        library.addBook(1, "Book 1");
+        library.addBook(2, "Book 2");
+
+        library.addUser(101, "User 1");
+        library.addUser(102, "User 2");
+
+        System.out.println(library.rentBook(101, 1, 7));
+
+        System.out.println(library.returnBook(101, 1, 6));
+
+        System.out.println(library.returnBook(101, 1, 8));
+
+        System.out.println(library.returnBook(101, 1, 12));
+
+        library.resetPenaltiesAfterMonth();
+        System.out.println(library.returnBook(101, 1, 12));
+    }
+}
